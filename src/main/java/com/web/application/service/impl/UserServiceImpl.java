@@ -39,6 +39,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public UserDTO getUsers(long id) {
+		return userRepository.findById(id).map(UserMapper::toUserDTO).orElse(null);
+	}
+
+	@Override
 	public Page<User> adminListUserPages(String fullName, String phone, String email, String role, Integer page) {
 		page--;
 		if (page < 0) {
@@ -82,6 +87,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public void deleteAccount(User user) {
+		user.setStatus(false);
+		userRepository.save(user);
+	}
+
+	@Override
 	public User createAdmin(CreateUserRequest createUserRequest) {
 		User user = userRepository.findByEmail(createUserRequest.getEmail());
 		if (user != null) {
@@ -91,4 +102,5 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 		return user;
 	}
+
 }

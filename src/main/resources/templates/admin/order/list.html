@@ -26,7 +26,7 @@
                         <i class="bx bx-home-alt"></i>
                     </a>
                 </li>
-                <li><span>Danh sách đơn hàng</span></li>
+                <li><span>Quản lý đơn hàng</span></li>
             </ol>
             <a class="sidebar-right-toggle" data-open="sidebar-right"><i
                     class="fas fa-chevron-left"></i></a>
@@ -49,8 +49,6 @@
                                 class="fas fa-plus"></i></a>
                         <a href="/admin/orders" class="btn btn-primary">Refresh <i
                                 class="fas fa-redo-alt"></i></a>
-                        <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
-                                class="fas fa-search"></i></button>
                     </div>
                 </div>
             </div>
@@ -64,7 +62,7 @@
                     <th width="20%">Sản phẩm</th>
                     <th>Ngày tạo</th>
                     <th>Ngày sửa</th>
-                      <th>Thao tác</th>
+                    <th>Thao tác</th>
                 </tr>
                 <tr>
                 <tr class="heading-search">
@@ -96,6 +94,7 @@
                                 </th:block>
                             </select>
                         </th>
+                        <th></th>
                         <th></th>
                         <input type="hidden" name="page" id="page">
                     </form>
@@ -145,7 +144,7 @@
     <script type="text/javascript" th:src="@{/adminlte/pagination/jquery.simplePagination.js}"></script>
     <script type="text/javascript" th:src="@{/adminlte/js/table.js}"></script>
     <script th:inline="javascript">
-        let id, name, phone, status, product, page;
+        let id, name, phone, status, product, createdAt, modifiedAt, page;
         $(function () {
             let vars = parseUrl();
             id = vars["id"] || ""
@@ -155,6 +154,22 @@
             product = vars["product"] || ""
             page = vars["page"] || "0"
 
+            if(id.length > 255) {
+                alert("Chỉ được nhập tối đa 255 ký tự");
+                location.replace("http://localhost:8080/admin/orders");
+            }
+            if(name.length > 255) {
+                alert("Chỉ được nhập tối đa 255 ký tự");
+                location.replace("http://localhost:8080/admin/orders");
+            }
+            if(phone.length > 255) {
+                alert("Chỉ được nhập tối đa 255 ký tự");
+                location.replace("http://localhost:8080/admin/orders");
+            }
+            if(/[a-zA-Z]/.test(phone)) {
+                alert("Số điên thoại nhập vào không hợp lệ");
+                location.replace("http://localhost:8080/admin/orders");
+            }
             $('#id').val(id)
             $('#name').val(name)
             $('#phone').val(phone)

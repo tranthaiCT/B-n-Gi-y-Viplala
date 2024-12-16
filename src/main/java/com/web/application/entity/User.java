@@ -3,10 +3,6 @@ package com.web.application.entity;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.hibernate.annotations.Type;
-
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;

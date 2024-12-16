@@ -23,20 +23,18 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     Product findByName(String name);
 
     //Lấy tất cả sản phẩm
-    @Query(value = "SELECT pro.* FROM product pro right join (SELECT DISTINCT p.* FROM product p " +
+    @Query(value = "SELECT pro.id, pro.created_at, pro.description, pro.image_feedback, pro.images, pro.modified_at, pro.name, pro.price, pro.sale_price, pro.slug, pro.status, pro.total_sold, pro.product_view, pro.brand_id " +
+            "FROM product pro right join (SELECT DISTINCT p.* FROM product p " +
             "INNER JOIN product_category pc ON p.id = pc.product_id " +
             "INNER JOIN category c ON c.id = pc.category_id " +
             "WHERE p.id LIKE CONCAT('%',?1,'%') " +
             "AND p.name LIKE CONCAT('%',?2,'%') " +
             "AND c.id LIKE CONCAT('%',?3,'%') " +
-            "AND p.brand_id LIKE CONCAT('%',?4,'%')) as tb1 on pro.id=tb1.id", nativeQuery = true)
-    Page<Product> adminGetListProducts(String id, String name, String category, String brand, Pageable pageable);
-
-//    @Query(value = "SELECT NEW dto.model.com.nhutkhuong1.application.ProductInfoDTO(p.id, p.name, p.slug, p.price ,p.images ->> '$[0]', p.total_sold) " +
-//            "FROM product p " +
-//            "WHERE p.status = 1 " +
-//            "ORDER BY p.created_at DESC limit ?1",nativeQuery = true)
-//    List<ProductInfoDTO> getListBestSellProducts(int limit);
+            "AND p.brand_id LIKE CONCAT('%',?4,'%') " +
+            "AND p.price LIKE CONCAT('%',?5,'%') " +
+            "AND p.sale_price LIKE CONCAT('%',?6,'%')) as tb1 on pro.id=tb1.id"
+            , nativeQuery = true)
+    Page<Product> adminGetListProducts(String id, String name, String category, String brand, Long price, Long sale_price, Pageable pageable);
 
     //Lấy sản phẩm được bán nhiều
     @Query(nativeQuery = true,name = "getListBestSellProducts")
@@ -116,7 +114,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
             "ON product.id = product_category.product_id " +
             "INNER JOIN category " +
             "ON category.id = product_category.category_id " +
-            "WHERE product.status = true AND (product.name LIKE CONCAT('%',:keyword,'%') OR category.name LIKE CONCAT('%',:keyword,'%')) ")
+            "WHERE product.status = 1 AND (product.name LIKE CONCAT('%',:keyword,'%') OR category.name LIKE CONCAT('%',:keyword,'%')) ")
     int countProductByKeyword(@Param("keyword") String keyword);
 
     @Query(name = "getProductOrders",nativeQuery = true)

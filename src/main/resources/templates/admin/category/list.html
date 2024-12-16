@@ -27,8 +27,7 @@
                         <i class="bx bx-home-alt"></i>
                     </a>
                 </li>
-                <li><span>Tables</span></li>
-                <li><span>Editable</span></li>
+                <li><span>Quản lý danh mục</span></li>
             </ol>
             <a class="sidebar-right-toggle" data-open="sidebar-right"><i
                     class="fas fa-chevron-left"></i></a>
@@ -50,8 +49,8 @@
                         <button id="addToTable" class="btn btn-primary" data-toggle="modal"
                                 data-target="#modal-add-new-category">Thêm mới danh mục <i
                                 class="fas fa-plus"></i></button>
-                        <!-- <button id="btn-search" class="btn btn-primary">Tìm kiếm <i
-                                class="fas fa-search"></i></button> -->
+                        <a href="/admin/category" class="btn btn-primary">Refresh <i
+                                class="fas fa-redo-alt"></i></a>
                     </div>
                 </div>
             </div>
@@ -61,7 +60,6 @@
                     <th>ID</th>
                     <th>Tên danh mục</th>
                     <th>Trạng thái danh mục</th>
-                    <th>Thứ tự danh mục</th>
                     <th>Ngày tạo danh mục</th>
                     <th>Ngày sửa danh mục</th>
                     <th>Thao tác</th>
@@ -84,7 +82,6 @@
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th></th>
                         <input type="hidden" name="page" id="page">
                     </form>
                 </tr>
@@ -95,7 +92,6 @@
                         <td th:text="${category.id}"></td>
                         <td class="category-name" th:data-id="${category.id}" th:text="${category.name}"></td>
                         <td class="category-status" th:text="${category.status?'Hiện':'Ẩn'}"></td>
-                        <td th:text="${category.order}"></td>
                         <td th:text="${#dates.format(category.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td th:text="${#dates.format(category.modifiedAt, 'dd-MM-yyyy HH:mm')}"></td>
                         <td class="actions">
@@ -205,20 +201,6 @@
 
             pagination([[${totalPages}]], [[${currentPage}]])
         });
-        // $(document).ready(function () {
-        //     $("#category_order").sortable({
-        //         placeholder: 'ui-state-highlight',
-        //         update: function (e, ui) {
-        //             let page_id_array = new Array();
-        //             $("#category_order tr").each(function () {
-        //                 page_id_array.push($(this).data("id"));
-        //             })
-        //             axios.put("/admin/api/categories", page_id_array).then(function (data) {
-        //                 toastr.success("Thay đổi thứ tự thành công!");
-        //             })
-        //         }
-        //     });
-        // });
 
         $("#formCategory").submit(function (e) {
             e.preventDefault();

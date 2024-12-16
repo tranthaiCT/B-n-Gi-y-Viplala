@@ -42,7 +42,7 @@ import lombok.Setter;
                 "inner join product p on p.id = pc.product_id " +
                 "inner join orders o on o.product_id = p.id " +
                 "where o.status = 3 " +
-                "group by c.id "
+                "group by c.name "
 )
 @AllArgsConstructor
 @NoArgsConstructor
@@ -58,17 +58,10 @@ public class Category {
     private String name;
     @Column(name = "slug",nullable = false)
     private String slug;
-//    @Column(name = "description")
-//    private String description;
-    @Column(name = "orders")
-    private int order;
     @Column(name = "status",columnDefinition = "BOOLEAN")
     private boolean status;
     @Column(name = "created_at")
     private Timestamp createdAt;
     @Column(name = "modified_at")
     private Timestamp modifiedAt;
-
-//    @ManyToMany(mappedBy = "categories")
-//    private List<Product> products;
 }

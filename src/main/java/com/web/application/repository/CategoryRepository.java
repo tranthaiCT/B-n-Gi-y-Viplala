@@ -27,5 +27,4 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query(name = "getProductOrderCategories",nativeQuery = true)
     List<ChartDTO> getListProductOrderCategories();
 
-//    List<Category> findByProducts_Name(String name);
 }

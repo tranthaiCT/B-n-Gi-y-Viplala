@@ -1,5 +1,6 @@
 package com.web.application.controller.admin;
 
+import com.web.application.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import com.web.application.service.ImageService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 public class BrandController {
@@ -30,15 +30,18 @@ public class BrandController {
 	private ImageService imageService;
 
 	@GetMapping("/admin/brands")
-	public String homePage(Model model, @RequestParam(defaultValue = "", required = false) String keyword,
-			@RequestParam(defaultValue = "1", required = false) Integer page) {
-		// Lấy tất cả các anh của user upload
-		User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-				.getUser();
+	public String homePage(Model model,
+						   @RequestParam(defaultValue = "", required = false) String id,
+						   @RequestParam(defaultValue = "", required = false) String name,
+						   @RequestParam(defaultValue = "", required = false) String status,
+						   @RequestParam(defaultValue = "1", required = false) Integer page) {
+
+		//Lấy tất cả các anh của user upload
+		User user = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUser();
 		List<String> images = imageService.getListImageOfUser(user.getId());
 		model.addAttribute("images", images);
 
-		Page<Brand> brands = brandService.adminGetListBrands(keyword, keyword, keyword, page);
+		Page<Brand> brands = brandService.adminGetListBrands(id, name, status, page);
 		model.addAttribute("brands", brands.getContent());
 		model.addAttribute("totalPages", brands.getTotalPages());
 		model.addAttribute("currentPage", brands.getPageable().getPageNumber() + 1);

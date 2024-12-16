@@ -14,6 +14,7 @@
     <th:block id="css-resources">
         <link rel="stylesheet" th:href="@{/adminlte/pagination/simplePagination.css}">
         <link rel="stylesheet" th:href="@{/adminlte/css/order.css}">
+        <link rel="stylesheet" th:href="@{/adminlte/css/invoice-print.css}">
     </th:block>
 </head>
 <body>
@@ -27,7 +28,7 @@
                         <i class="bx bx-home-alt"></i>
                     </a>
                 </li>
-                <li><a href="/admin/orders"><span>Thông tin đơn hàng</span></a></li>
+                <li><a href="/admin/orders"><span>Quản lý đơn hàng</span></a></li>
                 <li><span th:text="'Đơn hàng ' + ${order.id}"></span></li>
             </ol>
             <a class="sidebar-right-toggle" data-open="sidebar-right"><i
@@ -45,10 +46,11 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="mb-3">
-                            <a href="/admin/orders" class="btn btn-primary"><i
-                                    class="fas fa-chevron-left"></i> Trở về</a>
-                            <button type="button" id="addToTable" class="btn btn-primary btn-update-order">Cập nhật  <i
-                                    class="fas fa-plus"></i></button>
+                            <a href="/admin/orders" class="btn btn-primary">
+                                <i class="fas fa-chevron-left"></i> Trở về</a>
+                            <button type="button" id="addToTable" class="btn btn-primary btn-update-order">Cập nhật
+                                <i class="fas fa-plus"></i></button>
+                            <button type="button" id="printInvoice" class="btn btn-primary btn-print-invoice">In hóa đơn</button>
                         </div>
                     </div>
                 </div>
@@ -119,6 +121,7 @@
                                                         </div>
                                                         <input id="receiver-phone" type="text" class="form-control" th:value="${order.receiverPhone}" th:readonly="${order.status} != 1">
                                                         <span class="invalid-feedback" id="invalid-feedback-phone">Điện thoại trống</span>
+                                                        <span class="invalid-feedback" id="invalid-feedback-form-phone">Số điện thoại không hợp lệ</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -187,12 +190,12 @@
                                     <div class="col-md-4">
                                         <div class="edit-order-div">
                                             <label>Trạng thái đơn hàng</label>
-                                            <select name="status" class="form-control thuy-search-select" id="status">
+                                            <select name="status" onchange="checkStatus(this)" class="form-control thuy-search-select" id="status">
                                                 <option value="1" th:selected="${order.status} == 1">Chờ lấy hàng</option>
                                                 <option value="2" th:selected="${order.status} == 2">Đang giao hàng</option>
                                                 <option value="3" th:selected="${order.status} == 3">Đã giao hàng</option>
-                                                <option value="4" th:selected="${order.status} == 4">Đơn hàng bị trả lại</option>
-                                                <option value="5" th:selected="${order.status} == 5">Đơn hàng bị hủy</option>
+                                                <option value="4" th:selected="${order.status} == 4" disabled>Đơn hàng bị trả lại</option>
+                                                <option value="5" id="cancel" th:selected="${order.status} == 5">Đơn hàng bị hủy</option>
                                             </select>
                                             <br>
                                             <label>Ghi chú</label>
@@ -207,7 +210,75 @@
                 </div>
             </div>
         </section>
+    <section id="invoice-content" class="invoice-container">
+        <div class="invoice-header">
+            <div class="invoice-logo-background">
+                <img th:src="@{https://static.vecteezy.com/system/resources/previews/023/606/821/non_2x/shoes-logo-design-sneakers-logo-design-vector.jpg}" alt="logo" class="invoice-logo">
+            </div>
+            <div class="invoice-header-right">
+                <h1 class="invoice-title">Hóa đơn bán hàng</h1>
+            </div>
+        </div>
 
+        <div class="invoice-info">
+            <h3>Thông tin người nhận</h3>
+            <p><strong>Khách hàng:</strong> <span th:text="${order.receiverName}"></span></p>
+            <p><strong>Ngày đặt hàng:</strong> <span th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+            <p><strong>Số điện thoại:</strong> <span th:text="${order.receiverPhone}"></span></p>
+            <p><strong>Địa chỉ:</strong>
+                <span th:text="${order.receiverAddress}"></span>
+            </p>
+        </div>
+
+        <h2 class="invoice-details-title">Chi tiết đơn hàng</h2>
+        <table class="invoice-table">
+            <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Kích cỡ</th>
+                <th>Giá tiền</th>
+                <th>Khuyến mãi</th>
+                <th>Mức giảm</th>
+                <th>Thành tiền</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <span th:text="${order.product.name}"></span>
+                </td>
+                <td>
+                    <span th:text="${order.size}"></span>
+                    <th:block th:if="${order.status} == 1">
+                        <span th:if="${sizeIsAvailable} == false" class="badge badge-danger">Hết hàng</span>
+                    </th:block>
+                </td>
+                <td>
+                    <span class="text-price" th:text="${order.price}"></span> đ
+                </td>
+                <td>
+                    <span th:if="${order.promotion} != null" th:text="${order.promotion.couponCode}"></span>
+                </td>
+                <td>
+                    <div th:if="${order.promotion} != null">
+                        <th:block th:if="${order.promotion.discountType} == 1">
+                            <span th:text="${order.promotion.discountValue}"></span> %
+                        </th:block>
+                        <th:block th:if="${order.promotion.discountType} == 2">
+                            <span class="text-price" th:text="${order.promotion.discountValue}"></span> đ
+                        </th:block>
+                    </div>
+                </td>
+                <td>
+                    <span class="text-price" th:text="${order.totalPrice}"></span> đ
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="invoice-summary">
+            <p><strong>Tổng tiền cần thanh toán:</strong> <span th:text="${order.totalPrice}"></span> đ</p>
+        </div>
+    </section>
     <!-- Modal change detail order -->
     <th:block th:if="${order.status} == 1">
         <div class="modal fade" id="modal-change-detail-order" tabindex="-1" role="dialog" aria-labelledby="modalChangeDetailOrder" aria-hidden="true">
@@ -275,11 +346,68 @@
             </div>
         </div>
     </th:block>
-
+    <div class="modal fade" id="cancelProduct" tabindex="-1"
+         data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordLabel">Bạn có chắc chắn muốn huỷ đơn hàng không?</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="new-password-confirm item-row">
+                        <div class="text required-label">Lý do hủy đơn</div>
+                        <div class="password-wrapper-in">
+                            <input class="form-control" type="text" id="note-huy" />
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-huy" type="button" data-dismiss="modal">Huỷ
+                        bỏ</button>
+                    <button class="btn btn-primary red-btn btn-confirm-return-product"
+                            th:data-order="${order.id}" type="button">Đồng ý</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 <th:block id="js-resources">
     <script th:inline="javascript">
+        let initialStatus = $("#status").val();
+        if(initialStatus === "3"){
+            $("#cancel").prop("disabled", true);
+        }
+        function checkStatus(selectElement) {
+            if (selectElement.value === "5") {
+                $("#cancelProduct").modal("show");
+            }
+        }
+
+        $('.btn-confirm-return-product').click(function() {
+            let isValid = true;
+            let noteValue = $("#note-huy").val();
+            if (noteValue.trim().isEmpty) {
+                noteInvalid = $("#note-huy").next();
+                noteInvalid.css('display', 'block');
+                noteInvalid.html('Vui lòng nhập lý do');
+                isValid = false;
+            }else {
+                $("#note").next().css("display", "none");
+            }
+
+            if (isValid) {
+                $("#note").val(noteValue);
+                $("#cancelProduct").modal("hide");
+            }
+
+        })
+        $('.btn-huy').click(function() {
+            $("#status").val(initialStatus);
+            $("#cancelProduct").modal("hide"); // Đóng modal
+        })
+        
         var status = [[${order.status}]]
         if (status == 1) {
             let products = [[${products}]]
@@ -397,6 +525,18 @@
             }
         }
 
+        $('.btn-print-invoice').click(function () {
+            const invoiceContent = document.getElementById("invoice-content");
+            if (invoiceContent) {
+                invoiceContent.style.display = 'block';
+                const originalContent = document.body.innerHTML;
+                document.body.innerHTML = invoiceContent.outerHTML;
+                window.print();
+                document.body.innerHTML = originalContent;
+                window.location.reload();
+            }
+        })
+
         $('.btn-update-order').click(function() {
             $('.invalid-feedback').hide();
             let receiverName = $('#receiver-name').val();
@@ -414,11 +554,14 @@
                 $('#invalid-feedback-phone').show();
                 isValid = false;
             }
+            if (!/((09|03|07|08|05)+([0-9]{8})\b)/g.test(receiverPhone)) {
+                $('#invalid-feedback-form-phone').show();
+                isValid = false;
+            }
             if (receiverAddress.length == 0) {
                 $('#invalid-feedback-address').show();
                 isValid = false;
             }
-
             if (isValid) {
                 req = {
                     receiver_name: receiverName,
@@ -436,7 +579,7 @@
                     success: function(data) {
                         toastr.success("Cập nhật thành công");
                         setTimeout(function() {
-                            location.href = "/admin/orders/update/"+[[${order.id}]];
+                            location.href = "/admin/orders";
                         }, 1000)
                     },
                     error: function(error) {

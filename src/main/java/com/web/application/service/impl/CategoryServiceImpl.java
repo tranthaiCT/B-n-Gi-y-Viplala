@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (page <= 0) {
             page = 0;
         }
-        Pageable pageable = PageRequest.of(page, Contant.LIMIT_CATEGORY, Sort.by("created_at").descending());
+        Pageable pageable = PageRequest.of(page, Contant.LIMIT_CATEGORY, Sort.by("id").descending());
         return categoryRepository.adminGetListCategory(id, name, status, pageable);
     }
 
@@ -40,7 +40,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         for (int id: ids){
             Optional<Category> category = categoryRepository.findById((long) id);
-            category.get().setOrder(0);
             categoryRepository.save(category.get());
         }
     }
